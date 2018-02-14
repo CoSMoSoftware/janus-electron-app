@@ -3,7 +3,7 @@
 ## Setup
 Install electron:
 ```
-npm install --save dev
+npm install --dev
 ```
 
 ## Run
