@@ -1,0 +1,16 @@
+{
+  "name": "janus-electron-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+   "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoSMoSoftware/janus-electron-app.git"
+  },
+  "devDependencies": {
+    "electron": "^1.8.2"
+  }
+}
