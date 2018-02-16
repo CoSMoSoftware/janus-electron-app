@@ -68,14 +68,31 @@ var doSimulcast = false;
 
 var prompting = false;
 var alerted = false;
+
+function b64EncodeUnicode(str) {
+    // first we use encodeURIComponent to get percent-encoded UTF-8,
+    // then we convert the percent encodings into raw bytes which
+    // can be fed into btoa.
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+            return String.fromCharCode('0x' + p1);
+    }));
+}
+
+
 function promptAccessDetails() {
 	if(prompting)
 		return;
 	prompting = true;
+	var mediaCryptoKey = b64EncodeUnicode(Janus.randomString(44));
 	bootbox.alert({
 		message: "<div class='input-group margin-bottom-sm'>" +
 			"	<span class='input-group-addon'><i class='fa fa-server fa-fw'></i></span>" +
-			"	<input class='form-control' type='text' value='' placeholder='wss://localhost:8188' autocomplete='off' id='server'></input>" +
+			"	<input class='form-control' type='text' value='https://janus.conf.meetecho.com/janus' placeholder='wss://localhost:8188' autocomplete='off' id='server'></input>" +
+			"</div>" +
+			" <div class='input-group margin-bottom-sm'>" +
+			"	<span class='input-group-addon'><i class='fa fa-key fa-fw'></i></span>" +
+			"	<input class='form-control' type='text' value='"+mediaCryptoKey+"' autocomplete='off' id='mediaCryptoKey'></input>" +
 			"</div>" +
 			"<div class='margin-bottom-sm' style='padding-left: 45px;padding-top: 10px;'>" +
 				"<input id='simulcast' type='checkbox' size=5>Simulcast</input>" +
@@ -84,13 +101,14 @@ function promptAccessDetails() {
 		callback: function() {
 			prompting = false;
 			server = $('#server').val();
+			mediaCryptoKey = $('#mediaCryptoKey').val();
 			doSimulcast = $('#simulcast').is(":checked")
-			start(server);
+			start(server,mediaCryptoKey);
 		}
 	});
 }
 
-function start(server)
+function start(server,mediaCryptoKey)
 {
 
 if(started)
@@ -113,6 +131,7 @@ janus = new Janus(
 					plugin: "janus.plugin.videoroom",
 					opaqueId: opaqueId,
 					success: function(pluginHandle) {
+						debugger;
 						$('#details').remove();
 						sfutest = pluginHandle;
 						Janus.log("Plugin attached! (" + sfutest.getPlugin() + ", id=" + sfutest.getId() + ")");
@@ -127,6 +146,8 @@ janus = new Janus(
 								$(this).attr('disabled', true);
 								janus.destroy();
 							});
+						pluginHandle.webrtcStuff.mediaCryptoKey = mediaCryptoKey;
+						pluginHandle.webrtcStuff.mediaCryptoSuite = "AEAD_AES_256_GCM";
 					},
 					error: function(error) {
 						Janus.error("  -- Error attaching plugin...", error);

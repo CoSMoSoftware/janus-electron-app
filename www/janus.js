@@ -1324,6 +1324,10 @@ function Janus(gatewayCallbacks) {
 		// If we still need to create a PeerConnection, let's do that
 		if(!config.pc) {
 			var pc_config = {"iceServers": iceServers, "iceTransportPolicy": iceTransportPolicy, "bundlePolicy": bundlePolicy};
+			if (config.mediaCryptoKey && config.mediaCryptoSuite) {
+				pc_config.mediaCryptoKey = config.mediaCryptoKey;
+				pc_config.mediaCryptoSuite = config.mediaCryptoSuite;
+			}
 			//~ var pc_constraints = {'mandatory': {'MozDontOfferDataChannel':true}};
 			var pc_constraints = {
 				"optional": [{"DtlsSrtpKeyAgreement": true}]
@@ -1345,6 +1349,7 @@ function Janus(gatewayCallbacks) {
 				pc_config.bundlePolicy = "max-bundle";
 			}
 			Janus.log("Creating PeerConnection");
+			Janus.debug(pc_config);
 			Janus.debug(pc_constraints);
 			config.pc = new RTCPeerConnection(pc_config, pc_constraints);
 			Janus.debug(config.pc);
