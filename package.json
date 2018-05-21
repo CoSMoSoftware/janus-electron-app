@@ -11,6 +11,6 @@
     "url": "git+https://github.com/CoSMoSoftware/janus-electron-app.git"
   },
   "devDependencies": {
-    "electron": "^1.8.2"
+    "electron": "^2.0.0-beta.7"
   }
 }
