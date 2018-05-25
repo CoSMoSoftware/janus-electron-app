@@ -131,7 +131,7 @@ janus = new Janus(
 					plugin: "janus.plugin.videoroom",
 					opaqueId: opaqueId,
 					success: function(pluginHandle) {
-						debugger;
+						//debugger;
 						$('#details').remove();
 						sfutest = pluginHandle;
 						Janus.log("Plugin attached! (" + sfutest.getPlugin() + ", id=" + sfutest.getId() + ")");
@@ -157,7 +157,7 @@ janus = new Janus(
 						Janus.debug("Consent dialog should be " + (on ? "on" : "off") + " now");
 						if(on) {
 							// Darken screen and show hint
-							$.blockUI({ 
+							$.blockUI({
 								message: '<div><img src="up_arrow.png"/></div>',
 								css: {
 									border: 'none',
@@ -216,7 +216,7 @@ janus = new Janus(
 										var audio = list[f]["audio_codec"];
 										var video = list[f]["video_codec"];
 										Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
-										newRemoteFeed(id, display, audio, video);
+										newRemoteFeed(id, display, audio, video, mediaCryptoKey);
 									}
 								}
 							} else if(event === "destroyed") {
@@ -237,7 +237,7 @@ janus = new Janus(
 										var audio = list[f]["audio_codec"];
 										var video = list[f]["video_codec"];
 										Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
-										newRemoteFeed(id, display, audio, video);
+										newRemoteFeed(id, display, audio, video, mediaCryptoKey);
 									}
 								} else if(msg["leaving"] !== undefined && msg["leaving"] !== null) {
 									// One of the publishers has gone away?
@@ -498,7 +498,7 @@ function unpublishOwnFeed() {
 	sfutest.send({"message": unpublish});
 }
 
-function newRemoteFeed(id, display, audio, video) {
+function newRemoteFeed(id, display, audio, video, mediaCryptoKey) {
 	// A new feed has been published, create a new plugin handle and attach to it as a listener
 	var remoteFeed = null;
 	janus.attach(
@@ -524,6 +524,8 @@ function newRemoteFeed(id, display, audio, video) {
 					listen["offer_video"] = false;
 				}
 				remoteFeed.send({"message": listen});
+				pluginHandle.webrtcStuff.mediaCryptoKey = mediaCryptoKey;
+				pluginHandle.webrtcStuff.mediaCryptoSuite = "AEAD_AES_256_GCM";
 			},
 			error: function(error) {
 				Janus.error("  -- Error attaching plugin...", error);
@@ -677,7 +679,7 @@ function newRemoteFeed(id, display, audio, video) {
 				$('#novideo'+remoteFeed.rfindex).remove();
 				$('#curbitrate'+remoteFeed.rfindex).remove();
 				$('#curres'+remoteFeed.rfindex).remove();
-				if(bitrateTimer[remoteFeed.rfindex] !== null && bitrateTimer[remoteFeed.rfindex] !== null) 
+				if(bitrateTimer[remoteFeed.rfindex] !== null && bitrateTimer[remoteFeed.rfindex] !== null)
 					clearInterval(bitrateTimer[remoteFeed.rfindex]);
 				bitrateTimer[remoteFeed.rfindex] = null;
 				remoteFeed.simulcastStarted = false;
